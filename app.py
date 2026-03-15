@@ -7,7 +7,7 @@ app = Flask(__name__)
 # IMPORTANT: Change this to a long random string before deploying.
 # You can generate one with: python -c "import secrets; print(secrets.token_hex(32))"
 # ------------------------------------------------------------------
-app.secret_key = os.environ.get("SECRET_KEY", "E26z8H+q"s/Xj<Y)X(")
+app.secret_key = os.environ.get("SECRET_KEY", "CHANGE_ME_BEFORE_DEPLOYING")
 
 # ------------------------------------------------------------------
 # Set your password here. Replace the placeholder before deploying.
