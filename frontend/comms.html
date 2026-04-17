@@ -1,0 +1,323 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CIRCLE OF THE NINTH GATE — Transmission Log</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=IM+Fell+English:ital@0;1&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg:        #0a0804;
+    --surface:   #0f0c07;
+    --border:    #2a2215;
+    --accent:    #8b6914;
+    --glow:      #c49a1e;
+    --text:      #c8b89a;
+    --muted:     #5a4e38;
+    --red:       #6b1a1a;
+    --red-bright:#c0392b;
+    --mono:      'Share Tech Mono', monospace;
+    --serif:     'IM Fell English', serif;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--mono);
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    overflow-x: hidden;
+  }
+
+  /* Noise + vignette */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.03'/%3E%3C/svg%3E");
+    opacity: 0.4;
+    pointer-events: none;
+    z-index: 0;
+  }
+  body::after {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background: radial-gradient(ellipse at center, transparent 40%, rgba(0,0,0,0.8) 100%);
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  /* Gate: shown while token verification runs */
+  #gate {
+    position: fixed;
+    inset: 0;
+    background: var(--bg);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 100;
+    font-size: 0.6rem;
+    letter-spacing: 0.3em;
+    color: var(--muted);
+    text-transform: uppercase;
+    transition: opacity 0.6s;
+  }
+
+  .main {
+    position: relative;
+    z-index: 1;
+    width: 100%;
+    max-width: 700px;
+    padding: 2rem 1rem 3rem;
+    animation: fadeIn 1.2s ease forwards;
+    opacity: 0;
+  }
+
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(8px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  /* ── Header ── */
+  .comms-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    border-bottom: 1px solid var(--border);
+    padding-bottom: 1rem;
+    margin-bottom: 0.5rem;
+  }
+
+  .comms-title {
+    font-family: var(--serif);
+    font-size: 0.8rem;
+    letter-spacing: 0.3em;
+    color: var(--accent);
+    text-transform: uppercase;
+  }
+
+  .comms-status {
+    font-size: 0.55rem;
+    letter-spacing: 0.2em;
+    color: var(--muted);
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+  }
+
+  .status-dot {
+    width: 5px; height: 5px;
+    background: #2a7a2a;
+    border-radius: 50%;
+    animation: blink 2.5s ease-in-out infinite;
+    box-shadow: 0 0 4px #2a7a2a;
+  }
+  @keyframes blink {
+    0%,100% { opacity: 1; } 50% { opacity: 0.3; }
+  }
+
+  /* ── Rune strip ── */
+  .rune-strip {
+    font-family: var(--serif);
+    font-size: 0.7rem;
+    color: var(--muted);
+    letter-spacing: 0.3em;
+    text-align: center;
+    padding: 0.4rem 0;
+    opacity: 0.6;
+    user-select: none;
+  }
+
+  /* ── Session info ── */
+  .session-info {
+    margin: 1.2rem 0 2rem;
+    display: flex;
+    gap: 2rem;
+  }
+
+  .session-field {
+    font-size: 0.55rem;
+    letter-spacing: 0.2em;
+    color: var(--muted);
+    text-transform: uppercase;
+  }
+  .session-field span {
+    color: var(--text);
+    display: block;
+    margin-top: 0.2rem;
+  }
+
+  /* ── Messages ── */
+  .messages-label {
+    font-size: 0.55rem;
+    letter-spacing: 0.25em;
+    color: var(--muted);
+    text-transform: uppercase;
+    margin-bottom: 1rem;
+    border-left: 2px solid var(--border);
+    padding-left: 0.6rem;
+  }
+
+  .message-card {
+    border: 1px solid var(--border);
+    margin-bottom: 1rem;
+    background: rgba(15,12,7,0.6);
+    position: relative;
+    overflow: hidden;
+  }
+
+  .message-card::before {
+    content: '';
+    position: absolute;
+    left: 0; top: 0; bottom: 0;
+    width: 2px;
+    background: linear-gradient(to bottom, transparent, var(--accent), transparent);
+    opacity: 0.4;
+  }
+
+  .msg-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.6rem 1rem;
+    border-bottom: 1px solid var(--border);
+    background: rgba(0,0,0,0.2);
+  }
+
+  .msg-id {
+    font-size: 0.55rem;
+    letter-spacing: 0.2em;
+    color: var(--accent);
+    text-transform: uppercase;
+  }
+
+  .msg-meta {
+    font-size: 0.5rem;
+    color: var(--muted);
+    letter-spacing: 0.15em;
+  }
+
+  .msg-body {
+    padding: 1rem;
+    font-size: 0.78rem;
+    line-height: 1.7;
+    word-break: break-all;
+    color: var(--text);
+    letter-spacing: 0.05em;
+  }
+
+  .msg-tag {
+    display: inline-block;
+    font-size: 0.45rem;
+    letter-spacing: 0.2em;
+    padding: 0.15rem 0.4rem;
+    border: 1px solid var(--border);
+    color: var(--muted);
+    margin-bottom: 0.5rem;
+    text-transform: uppercase;
+  }
+
+  .msg-author {
+    color: var(--muted);
+    font-size: 0.7rem;
+  }
+
+  /* ── Logout ── */
+  .logout-btn {
+    margin-top: 2rem;
+    background: transparent;
+    border: 1px solid var(--border);
+    color: var(--muted);
+    font-family: var(--mono);
+    font-size: 0.55rem;
+    letter-spacing: 0.25em;
+    padding: 0.45rem 0.9rem;
+    cursor: pointer;
+    text-transform: uppercase;
+    transition: border-color 0.3s, color 0.3s;
+  }
+  .logout-btn:hover { border-color: var(--red); color: var(--red-bright); }
+</style>
+</head>
+<body>
+
+<!-- Token verification overlay -->
+<div id="gate">Verifying clearance...</div>
+
+<div class="main" id="main" style="display:none;">
+
+  <div class="comms-header">
+    <div class="comms-title">Circle of the Ninth Gate — Internal Transmission Log</div>
+    <div class="comms-status">
+      <span class="status-dot"></span>
+      <span>NODE ACTIVE</span>
+    </div>
+  </div>
+
+  <div class="rune-strip">ᚷ ᚨ ᛏ ᛖ ᚹ ᚨ ᚱ ᛞ ᛖ ᚾ ᛊ ᚹ ᚨ ᚲ ᚺ ᛖ ᛊ</div>
+
+  <div class="session-info">
+    <div class="session-field">Session  <span id="session-id">—</span></div>
+    <div class="session-field">Clearance<span>NINTH CIRCLE</span></div>
+    <div class="session-field">Timestamp<span id="session-time">—</span></div>
+  </div>
+
+  <div class="messages-label">Intercepted Transmissions — 3 of 3 Decoded</div>
+
+  <!-- ── Transmission 001 ── -->
+  <div class="message-card">
+    <div class="msg-header">
+      <span class="msg-id">TRANSMISSION ∙ 001</span>
+      <span class="msg-meta">ORIGIN: GATE-III &nbsp;|&nbsp; CIPHER: ROT-13</span>
+    </div>
+    <div class="msg-body">
+      <div class="msg-tag">Encrypted</div><br>
+      <!-- TODO: Replace with your CTF ciphertext -->
+      Uryyb oebgure. Gur evghny ortvaf ng zvqavtug. Oevat gur grkgrpu naq yrnil qrpbqrq cnegf gb gur nyyne orsber gur pybpx fgevirf gjryir. Gur Avar Tngrf zhfg abg snyy.<br><br>
+      <span class="msg-author">— MAGISTER VORN</span>
+    </div>
+  </div>
+
+  <!-- ── Transmission 002 ── -->
+  <div class="message-card">
+    <div class="msg-header">
+      <span class="msg-id">TRANSMISSION ∙ 002</span>
+      <span class="msg-meta">ORIGIN: GATE-VII &nbsp;|&nbsp; CIPHER: BASE64</span>
+    </div>
+    <div class="msg-body">
+      <div class="msg-tag">Encrypted</div><br>
+      <!-- TODO: Replace with your CTF ciphertext -->
+      VGhlIHNhY3JpZmljZSBtdXN0IGJlIG9mZmVyZWQgYmVmb3JlIHRoZSB0aGlyZCBtb29uLiBUaGUgcnVuZXMgc3BlYWsgb25seSB0byB0aG9zZSB3aG8gaGF2ZSBwYXNzZWQgdGhlIG5pbnRoIGdhdGUu<br><br>
+      <span class="msg-author">— ARCHIVIST SELENE</span>
+    </div>
+  </div>
+
+  <!-- ── Transmission 003 ── -->
+  <div class="message-card">
+    <div class="msg-header">
+      <span class="msg-id">TRANSMISSION ∙ 003</span>
+      <span class="msg-meta">ORIGIN: GATE-IX &nbsp;|&nbsp; CIPHER: UNKNOWN</span>
+    </div>
+    <div class="msg-body">
+      <div class="msg-tag">Encrypted</div><br>
+      <!-- TODO: Replace with your CTF ciphertext -->
+      Ymj Knwxy Uflj nx mngijr zsijtsnymj xytsj. Ymj ujszkqynrfyj bnqq gjfwymj rfwr tk ymj Snsynm Lfyj. Xyfsibktwymj knsfq wnyzen qtsi mfx gjlzs.<br><br>
+      <span class="msg-author">— THE KEEPER</span>
+    </div>
+  </div>
+
+  <div class="rune-strip" style="margin-top:0.5rem;">ᚠ ᚢ ᚦ ᚨ ᚱ ᚲ ᚷ ᚹ ᚺ ᚾ ᛁ ᛃ ᛇ ᛈ ᛉ ᛊ ᛏ ᛒ ᛖ ᛗ ᛚ ᛜ ᛞ ᛟ</div>
+
+  <button class="logout-btn" id="logout-btn">⬡ Terminate Session</button>
+
+</div>
+
+<script src="auth.js"></script>
+</body>
+</html>

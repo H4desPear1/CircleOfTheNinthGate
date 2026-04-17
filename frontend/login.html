@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CIRCLE OF THE NINTH GATE — Secure Node</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=IM+Fell+English:ital@0;1&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg:        #0a0804;
+    --surface:   #0f0c07;
+    --border:    #2a2215;
+    --accent:    #8b6914;
+    --glow:      #c49a1e;
+    --text:      #c8b89a;
+    --muted:     #5a4e38;
+    --red:       #6b1a1a;
+    --red-bright:#c0392b;
+    --mono:      'Share Tech Mono', monospace;
+    --serif:     'IM Fell English', serif;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--mono);
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    overflow-x: hidden;
+  }
+
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.03'/%3E%3C/svg%3E");
+    opacity: 0.4;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  body::after {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background: radial-gradient(ellipse at center, transparent 40%, rgba(0,0,0,0.8) 100%);
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .wrap {
+    position: relative;
+    z-index: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 2rem 1rem;
+    animation: fadeIn 1.5s ease forwards;
+  }
+
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(8px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  /* ── Sigil ── */
+  .sigil {
+    width: 90px;
+    height: 90px;
+    margin-bottom: 2rem;
+    opacity: 0.85;
+    animation: pulse-sigil 4s ease-in-out infinite;
+  }
+
+  @keyframes pulse-sigil {
+    0%, 100% { filter: drop-shadow(0 0 8px rgba(196,154,30,0.25)); }
+    50%       { filter: drop-shadow(0 0 20px rgba(196,154,30,0.5)); }
+  }
+
+  /* ── Headings ── */
+  .org-name {
+    font-family: var(--serif);
+    font-size: 1.05rem;
+    letter-spacing: 0.35em;
+    color: var(--accent);
+    text-transform: uppercase;
+    margin-bottom: 0.3rem;
+    text-align: center;
+  }
+
+  .org-sub {
+    font-size: 0.6rem;
+    letter-spacing: 0.25em;
+    color: var(--muted);
+    text-align: center;
+    margin-bottom: 2.5rem;
+    text-transform: uppercase;
+  }
+
+  /* ── Login box ── */
+  .login-box {
+    border: 1px solid var(--border);
+    padding: 2rem 2.5rem;
+    width: 100%;
+    max-width: 380px;
+    background: rgba(15,12,7,0.8);
+    position: relative;
+  }
+
+  .login-box::before, .login-box::after {
+    content: '';
+    position: absolute;
+    width: 12px; height: 12px;
+    border-color: var(--accent);
+    border-style: solid;
+    opacity: 0.6;
+  }
+  .login-box::before { top: -1px;    left: -1px;  border-width: 1px 0 0 1px; }
+  .login-box::after  { bottom: -1px; right: -1px; border-width: 0 1px 1px 0; }
+
+  .login-label {
+    font-size: 0.6rem;
+    letter-spacing: 0.25em;
+    color: var(--muted);
+    text-transform: uppercase;
+    margin-bottom: 0.6rem;
+    display: block;
+  }
+
+  .login-input {
+    width: 100%;
+    background: rgba(0,0,0,0.5);
+    border: 1px solid var(--border);
+    border-bottom-color: var(--accent);
+    color: var(--glow);
+    font-family: var(--mono);
+    font-size: 0.85rem;
+    padding: 0.65rem 0.8rem;
+    outline: none;
+    letter-spacing: 0.15em;
+    transition: border-color 0.3s, box-shadow 0.3s;
+    -webkit-text-security: disc;
+  }
+
+  .login-input:focus {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 1px rgba(139,105,20,0.2), inset 0 0 10px rgba(139,105,20,0.05);
+  }
+
+  .login-btn {
+    width: 100%;
+    margin-top: 1.5rem;
+    padding: 0.7rem;
+    background: transparent;
+    border: 1px solid var(--accent);
+    color: var(--accent);
+    font-family: var(--mono);
+    font-size: 0.65rem;
+    letter-spacing: 0.3em;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: background 0.3s, color 0.3s, box-shadow 0.3s;
+  }
+
+  .login-btn:hover:not(:disabled) {
+    background: rgba(139,105,20,0.12);
+    color: var(--glow);
+    box-shadow: 0 0 15px rgba(139,105,20,0.2);
+  }
+
+  .login-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+
+  .login-error {
+    margin-top: 1rem;
+    font-size: 0.6rem;
+    letter-spacing: 0.2em;
+    color: var(--red-bright);
+    text-align: center;
+    min-height: 1em;
+    text-transform: uppercase;
+    opacity: 0;
+    transition: opacity 0.4s;
+  }
+  .login-error.visible { opacity: 1; }
+
+  .login-footer {
+    margin-top: 2.5rem;
+    font-size: 0.55rem;
+    color: var(--muted);
+    letter-spacing: 0.2em;
+    opacity: 0.5;
+    text-align: center;
+  }
+</style>
+</head>
+<body>
+
+<div class="wrap">
+
+  <svg class="sigil" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+    <circle cx="50" cy="50" r="46" fill="none" stroke="#2a2215" stroke-width="1"/>
+    <circle cx="50" cy="50" r="38" fill="none" stroke="#4a3a18" stroke-width="0.5"/>
+    <polygon points="50,6 54,38 85,20 65,47 97,50 65,53 85,80 54,62 50,94 46,62 15,80 35,53 3,50 35,47 15,20 46,38"
+             fill="none" stroke="#8b6914" stroke-width="0.8" opacity="0.7"/>
+    <circle cx="50" cy="50" r="10" fill="none" stroke="#c49a1e" stroke-width="0.7" opacity="0.6"/>
+    <g stroke="#5a4028" stroke-width="0.7" opacity="0.5">
+      <line x1="50" y1="4"  x2="50" y2="10"/>
+      <line x1="47" y1="7"  x2="53" y2="7"/>
+      <line x1="86" y1="19" x2="82" y2="24"/>
+      <line x1="96" y1="48" x2="90" y2="50"/>
+      <line x1="84" y1="79" x2="79" y2="75"/>
+      <line x1="50" y1="96" x2="50" y2="90"/>
+      <line x1="16" y1="79" x2="21" y2="75"/>
+      <line x1="4"  y1="48" x2="10" y2="50"/>
+      <line x1="14" y1="19" x2="18" y2="24"/>
+    </g>
+    <circle cx="50" cy="50" r="3" fill="#8b6914" opacity="0.8"/>
+  </svg>
+
+  <div class="org-name">Circle of the Ninth Gate</div>
+  <div class="org-sub">Secure Communication Node — Access Restricted</div>
+
+  <div class="login-box">
+    <label class="login-label" for="passfield">Passphrase</label>
+    <input class="login-input" id="passfield" type="password"
+           autocomplete="off" placeholder="· · · · · · · · · · · ·" spellcheck="false"/>
+    <button class="login-btn" id="login-btn" onclick="attemptLogin()">Authenticate</button>
+    <div class="login-error" id="login-error">Access denied — phrase unrecognized</div>
+  </div>
+
+  <div class="login-footer">NODE-IX &nbsp;·&nbsp; ENCRYPTED CHANNEL &nbsp;·&nbsp; UNAUTHORIZED ACCESS IS HERESY</div>
+
+</div>
+
+<script src="auth.js"></script>
+</body>
+</html>
