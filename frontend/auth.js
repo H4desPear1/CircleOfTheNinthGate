@@ -10,7 +10,7 @@
  * Example: "https://ninth-gate-production.up.railway.app"
  */
 
-const BACKEND_URL = "https://YOUR-RAILWAY-APP.up.railway.app"; // ← change this
+const BACKEND_URL = "https://circleoftheninthgate.onrender.com"; // ← change this
 const TOKEN_KEY   = "ng_session_token";
 const COMMS_PAGE  = "comms.html";
 const LOGIN_PAGE  = "login.html";
